@@ -1,4 +1,6 @@
-class sethostname {
+class sethostname (
+	$domain_name = "mu.jio"
+) {
     $nic = 'eth1'
     file { "/etc/hosts":
 	ensure => present,
@@ -23,4 +25,16 @@ class sethostname {
     unless => "test $hostname  = `cat /etc/hostname`",
   }
 
+  exec { "set-dns-cname":
+    command => "nsupdate <<EOF
+server $dns_master_server
+key dhcpupdate $dnsupdate_key
+zone $domain_name
+update add ${hostname_from_dns}.${domain_name} 86400 IN CNAME ${dnsname_from_dns}.${domain_name}
+send
+EOF
+",
+    path   => "/usr/bin:/usr/sbin:/bin",
+    unless => "host ${hostname_from_dns}.${domain_name}",
+  }
 }
