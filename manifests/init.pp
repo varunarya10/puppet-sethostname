@@ -1,13 +1,14 @@
 class sethostname (
 	$domain_name,
 	$dns_master_server,
-	$dnsupdate_key
+	$dnsupdate_key,
+        $hostgroup_from_dns
 ) {
   $nic = 'eth1'
   $hgs_to_use_fe_for_connectivity	= ['storage_node','database_node','contrail_node','cobbler_node','repo_node']
 #  $hgs_to_use_fe_for_connectivity=
 
-  if $::hostgroup_from_dns in $hgs_to_use_fe_for_connectivity {
+  if $hostgroup_from_dns in $hgs_to_use_fe_for_connectivity {
 	$dns_host_name_part =  regsubst($dnsname_from_dns,'^(\w\w\d\d\d\d)(\w)(-.*)','\1f\3','I')
   } else {
 	$dns_host_name_part =  regsubst($dnsname_from_dns,'^(\w\w\d\d\d\d)(\w)(-.*)','\1b\3','I')
