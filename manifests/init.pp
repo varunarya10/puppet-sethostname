@@ -2,11 +2,10 @@ class sethostname (
 	$domain_name,
 	$dns_master_server,
 	$dnsupdate_key,
-        $host_type='compute_node'
+        $host_type='compute_node',
+        $hgs_to_use_fe_for_connectivity = ['storage_node','database_node','contrail_node','cobbler_node','repo_node']
 ) {
   $nic = 'eth1'
-  $hgs_to_use_fe_for_connectivity	= ['storage_node','database_node','contrail_node','cobbler_node','repo_node']
-#  $hgs_to_use_fe_for_connectivity=
 
   if $host_type in $hgs_to_use_fe_for_connectivity {
 	$dns_host_name_part =  regsubst($dnsname_from_dns,'^(\w\w\d\d\d\d)(\w)(-.*)','\1f\3','I')
