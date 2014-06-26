@@ -1,17 +1,19 @@
-class sethostname (
-	$domain_name,
-	$dns_master_server,
-	$dnsupdate_key,
-        $host_type='compute_node',
-        $hgs_to_use_fe_for_connectivity = ['storage_node','database_node','contrail_node','cobbler_node','repo_node']
-) {
-  $nic = 'eth1'
+# Class: sethostname
+#
+# This class configure hostname by refering reverse dns lookup. It also setup cname from long dns name to function based dns name
+# Parameters:
+# $domain_name: dns domain name
+# $dns_master_server: dns master server address 
+# $dnsupdate_key: secret key to update dns
+# $update_dns: true or false to determine whether cname to be added to dns
 
-  if $host_type in $hgs_to_use_fe_for_connectivity {
-	$dns_host_name_part =  regsubst($dnsname_from_dns,'^(\w\w\d\d\d\d)(\w)(-.*)','\1f\3','I')
-  } else {
-	$dns_host_name_part =  regsubst($dnsname_from_dns,'^(\w\w\d\d\d\d)(\w)(-.*)','\1b\3','I')
-  }
+class sethostname (
+  $domain_name,
+  $dns_master_server,
+  $dnsupdate_key,
+  $update_dns = false,      
+) {
+
     file { "/etc/hosts":
 	ensure => present,
         owner => root,
@@ -35,16 +37,20 @@ class sethostname (
     unless => "test $hostname  = `cat /etc/hostname`",
   }
 
-  exec { "set-dns-cname":
-    command => "nsupdate <<EOF
+  if $dnsname_from_dns != 'notfound' {
+    if $update_dns {
+      exec { "set-dns-cname":
+        command => "nsupdate <<EOF
 server $dns_master_server
 key dhcpupdate $dnsupdate_key
 zone $domain_name
-update add ${hostname_from_dns}.${domain_name} 86400 IN CNAME ${dns_host_name_part}.${domain_name}
+update add ${hostname_from_dns}.${domain_name} 86400 IN CNAME ${dnsname_from_dns}.${domain_name}
 send
 EOF
 ",
-    path   => "/usr/bin:/usr/sbin:/bin",
-    unless => "host ${hostname_from_dns}.${domain_name}",
+        path   => "/usr/bin:/usr/sbin:/bin",
+        unless => "host ${hostname_from_dns}.${domain_name}",
+      }
+    }
   }
 }
