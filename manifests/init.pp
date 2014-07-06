@@ -14,14 +14,14 @@ class sethostname (
   $update_dns = false,      
 ) {
 
-    file { "/etc/hosts":
-	ensure => present,
-        owner => root,
-        group => root,
-        mode => 644,
-	content => template("sethostname/hosts.erb"),
-    	notify => File["/etc/hostname"],
-}
+#    file { "/etc/hosts":
+#	ensure => present,
+#        owner => root,
+#        group => root,
+#        mode => 644,
+#	content => template("sethostname/hosts.erb"),
+#    	notify => File["/etc/hostname"],
+#}
 
     file { "/etc/hostname":
    	ensure => present,
